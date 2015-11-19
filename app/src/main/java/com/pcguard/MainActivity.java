@@ -1,7 +1,9 @@
-package com.infosec;
+package com.pcguard;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -9,7 +11,13 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.infosec.R;
+
+import java.io.IOException;
 
 /**
  * Created by Krokhin on 12.11.2015.
@@ -35,9 +43,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     public Vibrator v;
 
+    Button sendButton;
+
+    BluetoothHandler BTHandler;
+    private final static int REQUEST_ENABLE_BT = 1;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("", "onCreate call");
         setContentView(R.layout.activity_main);
         initializeViews();
 
@@ -50,6 +64,17 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
+        BTHandler = new BluetoothHandler();
+
+
+        if (!BTHandler.mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+//            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            startActivityForResult(enableBluetooth, 0);
+        }
+        BTHandler.findBT();
+        BTHandler.openBT();
     }
 
     public void initializeViews() {
@@ -60,16 +85,53 @@ public class MainActivity extends Activity implements SensorEventListener {
         maxX = (TextView) findViewById(R.id.maxX);
         maxY = (TextView) findViewById(R.id.maxY);
         maxZ = (TextView) findViewById(R.id.maxZ);
+
+        sendButton = (Button) findViewById(R.id.lock);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    if (BTHandler != null) {
+                        BTHandler.sendData();
+                    }
+                } catch (IOException e) {
+                    Log.d("Cannot send data", e.getMessage());
+                }
+            }
+        });
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("", "onStop call");
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d("", "onRestart call");
+        super.onRestart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+//        BTHandler.findBT();
+//        try {
+        Log.d("", "onResume call");
+        //TODO understand is it necessary to call openBT() method or not.
+            BTHandler.openBT();
+//        } catch (IOException e) {
+//            Log.d("Error while opening BT", e.getMessage());
+//        }
 //        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     //onPause() unregister the accelerometer for stop listening the events
     protected void onPause() {
+        Log.d("", "onPause call");
         super.onPause();
+
 //        sensorManager.unregisterListener(this);
     }
 

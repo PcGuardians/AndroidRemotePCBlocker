@@ -175,12 +175,10 @@
 
         <Button
             android:id="@+id/lock"
-            android:layout_marginTop="6pt"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight=".70"
             android:background="@android:color/holo_blue_light"
-        android:text="Lock PC" />
+        android:text="Send" />
     </LinearLayout>
 
 </LinearLayout>
