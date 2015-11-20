@@ -60,7 +60,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 //			TODO may be change delay
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            vibrateThreshold = accelerometer.getMaximumRange() / 3;
+            vibrateThreshold = accelerometer.getMaximumRange() / 4;
         }
         v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -120,7 +120,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 //        try {
         Log.d("", "onResume call");
         //TODO understand is it necessary to call openBT() method or not.
-            BTHandler.openBT();
+        BTHandler.openBT();
 //        } catch (IOException e) {
 //            Log.d("Error while opening BT", e.getMessage());
 //        }
@@ -172,8 +172,15 @@ public class MainActivity extends Activity implements SensorEventListener {
             v.vibrate(50);
             amountOfShakes++;
         }
-        if (amountOfShakes > 4) {
-            Log.d(clazz, "BLOCK");
+        if (amountOfShakes > 3) {
+            try {
+                if (BTHandler != null) {
+                    BTHandler.sendData();
+                    Log.d(clazz, "BLOCK");
+                }
+            } catch (IOException e) {
+                Log.d("Cannot send data shakes", e.getMessage());
+            }
             amountOfShakes = 0;
         }
     }
