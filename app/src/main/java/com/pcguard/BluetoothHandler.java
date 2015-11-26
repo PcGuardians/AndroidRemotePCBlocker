@@ -18,13 +18,13 @@ import java.util.UUID;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
-public class BluetoothHandler extends Activity{
+public class BluetoothHandler extends Activity {
     BluetoothAdapter mBluetoothAdapter;
     BluetoothSocket mmSocket;
     BluetoothDevice mmDevice;
     OutputStream mmOutputStream;
     InputStream mmInputStream;
-//    Thread workerThread;
+    //    Thread workerThread;
 //    byte[] readBuffer;
 //    int readBufferPosition;
 //    int counter;
@@ -51,31 +51,30 @@ public class BluetoothHandler extends Activity{
         Log.d("BluetoothHandler", "Bluetooth Device Found");
     }
 
-    void openBT() {
+    void openBT() throws IOException {
         Log.d("openBT", "Trying to open socket connection");
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
-        try {
-            mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-            if (mmSocket.isConnected()) {
-                Log.d("Connection", " is installed");
-            }
 
-            Log.d("aka", "1");
-            mmSocket.connect();
-            Log.d("aka", "2");
-            mmOutputStream = mmSocket.getOutputStream();
-            Log.d("aka", "3");
-            mmInputStream = mmSocket.getInputStream();
-            Log.d("aka", "4");
-        } catch (IOException e) {
-            Log.d("Error", e.getMessage());
+        mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+        if (mmSocket.isConnected()) {
+            Log.d("Connection", " is installed");
         }
+
+        Log.d("aka", "1");
+        mmSocket.connect();
+        Log.d("aka", "2");
+        mmOutputStream = mmSocket.getOutputStream();
+        Log.d("aka", "3");
+        mmInputStream = mmSocket.getInputStream();
+        Log.d("aka", "4");
+
+        Log.d("BluetoothHandler","Bluetooth Opened");
+    }
 
 
 //        beginListenForData();
 
-        Log.d("BluetoothHandler", "Bluetooth Opened");
-    }
+
 
     /*void beginListenForData() {
         final Handler handler = new Handler();
@@ -123,7 +122,7 @@ public class BluetoothHandler extends Activity{
     void sendData() throws IOException {
 //        mmOutputStream.write(msg.getBytes()); - String to send
         String lockMessage = "trnf";
-        Log.d("OutPutStream", String.valueOf(mmOutputStream == null));
+
         mmOutputStream.write(lockMessage.getBytes());
         Log.d("BluetoothHandler", "Data Sent " + lockMessage);
     }

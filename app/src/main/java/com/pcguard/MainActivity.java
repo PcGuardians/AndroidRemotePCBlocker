@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.infosec.R;
 
@@ -51,30 +52,54 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("", "onCreate call");
-        setContentView(R.layout.activity_main);
-        initializeViews();
-
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//			TODO may be change delay
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            vibrateThreshold = accelerometer.getMaximumRange() / 4;
-        }
-        v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-
         BTHandler = new BluetoothHandler();
-
-
-        if (!BTHandler.mBluetoothAdapter.isEnabled()) {
+        if (BTHandler.mBluetoothAdapter.isEnabled()) {
+            Log.d(clazz, "BT enabled, init all");
+            initView();
+        } else {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 //            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 //            startActivityForResult(enableBluetooth, 0);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(clazz, "onActivityResult()");
+        if (requestCode == REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) {
+                initView();
+            }
+        }
+    }
+
+    private void initView() {
+        Log.d("", "onCreate call");
+        setContentView(R.layout.activity_main);
+        initializeViews();
+        boolean isStickEnabled = true;
         BTHandler.findBT();
-        BTHandler.openBT();
+        try {
+            BTHandler.openBT();
+
+        } catch (IOException e) {
+            CharSequence text = "USB stick out of range!";
+            Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+            toast.show();
+            isStickEnabled = false;
+        }
+
+        if(isStickEnabled) {
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+                accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+                vibrateThreshold = accelerometer.getMaximumRange() / 6;
+            }
+            v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        }
+
     }
 
     public void initializeViews() {
@@ -94,7 +119,10 @@ public class MainActivity extends Activity implements SensorEventListener {
                     if (BTHandler != null) {
                         BTHandler.sendData();
                     }
-                } catch (IOException e) {
+                } catch (Throwable e) {
+                    CharSequence text = "USB stick out of range!";
+                    Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+                    toast.show();
                     Log.d("Cannot send data", e.getMessage());
                 }
             }
@@ -120,7 +148,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 //        try {
         Log.d("", "onResume call");
         //TODO understand is it necessary to call openBT() method or not.
-        BTHandler.openBT();
+//        BTHandler.openBT();
 //        } catch (IOException e) {
 //            Log.d("Error while opening BT", e.getMessage());
 //        }
@@ -167,7 +195,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
     public void vibrate() {
-//        TODO start here timer and if mobile moves too long send block
         if ((deltaX > vibrateThreshold) || (deltaY > vibrateThreshold) || (deltaZ > vibrateThreshold)) {
             v.vibrate(50);
             amountOfShakes++;
@@ -180,6 +207,9 @@ public class MainActivity extends Activity implements SensorEventListener {
                 }
             } catch (IOException e) {
                 Log.d("Cannot send data shakes", e.getMessage());
+                CharSequence text = "USB stick out of range!";
+                Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+                toast.show();
             }
             amountOfShakes = 0;
         }
