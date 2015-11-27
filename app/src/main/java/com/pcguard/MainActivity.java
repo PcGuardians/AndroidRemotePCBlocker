@@ -55,7 +55,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         BTHandler = new BluetoothHandler();
         if (BTHandler.mBluetoothAdapter.isEnabled()) {
             Log.d(clazz, "BT enabled, init all");
-            initView();
+            init();
         } else {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -69,12 +69,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         Log.d(clazz, "onActivityResult()");
         if (requestCode == REQUEST_ENABLE_BT) {
             if (resultCode == RESULT_OK) {
-                initView();
+                init();
             }
         }
     }
 
-    private void initView() {
+    private void init() {
         Log.d("", "onCreate call");
         setContentView(R.layout.activity_main);
         initializeViews();
@@ -103,13 +103,13 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
     public void initializeViews() {
-        currentX = (TextView) findViewById(R.id.currentX);
+        /*currentX = (TextView) findViewById(R.id.currentX);
         currentY = (TextView) findViewById(R.id.currentY);
         currentZ = (TextView) findViewById(R.id.currentZ);
 
         maxX = (TextView) findViewById(R.id.maxX);
         maxY = (TextView) findViewById(R.id.maxY);
-        maxZ = (TextView) findViewById(R.id.maxZ);
+        maxZ = (TextView) findViewById(R.id.maxZ);*/
 
         sendButton = (Button) findViewById(R.id.lock);
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -171,10 +171,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        displayCleanValues();
+        /*displayCleanValues();
         displayCurrentValues();
         displayMaxValues();
-
+*/
         deltaX = Math.abs(lastX - event.values[0]);
         deltaY = Math.abs(lastY - event.values[1]);
         deltaZ = Math.abs(lastZ - event.values[2]);
@@ -215,20 +215,20 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
-    public void displayCleanValues() {
+   /* public void displayCleanValues() {
         currentX.setText("0.0");
         currentY.setText("0.0");
         currentZ.setText("0.0");
-    }
+    }*/
 
-    // display the current x,y,z accelerometer values
+ /*   // display the current x,y,z accelerometer values
     public void displayCurrentValues() {
         currentX.setText(Float.toString(deltaX));
         currentY.setText(Float.toString(deltaY));
         currentZ.setText(Float.toString(deltaZ));
-    }
+    }*/
 
-    // display the max x,y,z accelerometer values
+/*    // display the max x,y,z accelerometer values
     public void displayMaxValues() {
         if (deltaX > deltaXMax) {
             deltaXMax = deltaX;
@@ -242,6 +242,6 @@ public class MainActivity extends Activity implements SensorEventListener {
             deltaZMax = deltaZ;
             maxZ.setText(Float.toString(deltaZMax));
         }
-    }
+    }*/
 
 }
